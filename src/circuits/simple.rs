@@ -225,13 +225,13 @@ impl<F: Field> NumericInstructions<F> for FieldChip<F> {
 /// they won't have any value during key generation. During proving, if any of these
 /// were `None` we would get an error.
 #[derive(Default, Clone)]
-pub struct MyCircuit<F: Field> {
+pub struct SimpleCircuit<F: Field> {
     pub constant: F,
     pub a: Value<F>,
     pub b: Value<F>,
 }
 
-impl<F: Field> Circuit<F> for MyCircuit<F> {
+impl<F: Field> Circuit<F> for SimpleCircuit<F> {
     // Since we are using a single chip for everything, we can just reuse its config.
     type Config = FieldConfig;
     type FloorPlanner = SimpleFloorPlanner;
@@ -275,7 +275,7 @@ impl<F: Field> Circuit<F> for MyCircuit<F> {
 
 #[cfg(test)]
 mod tests {
-    use super::MyCircuit;
+    use super::SimpleCircuit;
     use halo2_curves::bn256::Fr;
     use halo2_proofs::{circuit::Value, dev::MockProver};
 
@@ -288,7 +288,7 @@ mod tests {
         let b = Fr::from(3);
         let c = constant * a.square() * b.square();
 
-        let circuit = MyCircuit {
+        let circuit = SimpleCircuit {
             constant,
             a: Value::known(a),
             b: Value::known(b),

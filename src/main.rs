@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use halo2_curves::bn256::{Bn256, Fq, Fr, G1Affine};
-use halo2_hello::simple::MyCircuit;
+use halo2_hello::circuits::simple::SimpleCircuit;
 use halo2_proofs::{
     circuit::Value,
     dev::MockProver,
@@ -110,7 +110,7 @@ fn main() {
     // prepare verifier
     let constant = Fr::from(7);
     let params = gen_srs(4);
-    let empty_circuit = MyCircuit {
+    let empty_circuit = SimpleCircuit {
         constant,
         a: Value::unknown(),
         b: Value::unknown(),
@@ -124,7 +124,7 @@ fn main() {
     let a = Fr::from(2);
     let b = Fr::from(3);
     let c = constant * a.square() * b.square();
-    let circuit = MyCircuit {
+    let circuit = SimpleCircuit {
         constant,
         a: Value::known(a),
         b: Value::known(b),
