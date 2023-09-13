@@ -1,12 +1,23 @@
 use std::rc::Rc;
 
-use halo2_curves::{bn256::{Bn256, Fq, Fr, G1Affine}, ff::Field};
+use halo2_curves::bn256::{Bn256, Fq, Fr, G1Affine};
 use halo2_hello::simple::MyCircuit;
 use halo2_proofs::{
     circuit::Value,
-    plonk::{keygen_pk, keygen_vk, Circuit, ProvingKey, VerifyingKey, create_proof, verify_proof},
-    poly::{kzg::{commitment::{ParamsKZG, KZGCommitmentScheme}, multiopen::{VerifierGWC, ProverGWC}, strategy::AccumulatorStrategy}, commitment::{ParamsProver, Params}, VerificationStrategy}, dev::MockProver, transcript::{TranscriptWriterBuffer, TranscriptReadBuffer},
+    dev::MockProver,
+    plonk::{create_proof, keygen_pk, keygen_vk, verify_proof, Circuit, ProvingKey, VerifyingKey},
+    poly::{
+        commitment::{Params, ParamsProver},
+        kzg::{
+            commitment::{KZGCommitmentScheme, ParamsKZG},
+            multiopen::{ProverGWC, VerifierGWC},
+            strategy::AccumulatorStrategy,
+        },
+        VerificationStrategy,
+    },
+    transcript::{TranscriptReadBuffer, TranscriptWriterBuffer},
 };
+use itertools::Itertools;
 use rand::rngs::OsRng;
 use snark_verifier::{
     loader::evm::{self, deploy_and_call, encode_calldata, EvmLoader},
@@ -14,7 +25,6 @@ use snark_verifier::{
     system::halo2::{compile, transcript::evm::EvmTranscript, Config},
     verifier::{self, SnarkVerifier},
 };
-use itertools::Itertools;
 
 type PlonkVerifier = verifier::plonk::PlonkVerifier<KzgAs<Bn256, Gwc19>>;
 
@@ -56,8 +66,7 @@ fn gen_proof<C: Circuit<Fr>>(
     circuit: C,
     instances: Vec<Vec<Fr>>,
 ) -> Vec<u8> {
-    MockProver::run(
-        params.k(), &circuit, instances.clone())
+    MockProver::run(params.k(), &circuit, instances.clone())
         .unwrap()
         .assert_satisfied();
 
@@ -104,22 +113,28 @@ fn evm_verify(deployment_code: Vec<u8>, instances: Vec<Vec<Fr>>, proof: Vec<u8>)
 }
 
 fn main() {
-    let params = gen_srs(4);
-
+    // prepare verifier
     let constant = Fr::from(7);
+    let params = gen_srs(4);
+    let empty_circuit = MyCircuit {
+        constant,
+        a: Value::unknown(),
+        b: Value::unknown(),
+    };
+
+    let pk = gen_pk(&params, &empty_circuit);
+    let deployment_code = gen_evm_verifier(&params, pk.get_vk(), vec![1]);
+    println!("0x{}", hex::encode(deployment_code.clone()));
+
+    // prove & verify
     let a = Fr::from(2);
     let b = Fr::from(3);
     let c = constant * a.square() * b.square();
-
     let circuit = MyCircuit {
         constant,
         a: Value::known(a),
         b: Value::known(b),
     };
-
-    let pk = gen_pk(&params, &circuit);
-    let deployment_code = gen_evm_verifier(&params, pk.get_vk(), vec![1]);
-
-    let proof = gen_proof(&params, &pk, circuit.clone(),  vec![vec![c]]);
+    let proof = gen_proof(&params, &pk, circuit.clone(), vec![vec![c]]);
     evm_verify(deployment_code, vec![vec![c]], proof);
 }

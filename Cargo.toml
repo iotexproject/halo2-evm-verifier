@@ -9,3 +9,4 @@ halo2_curves = { git = "https://github.com/privacy-scaling-explorations/halo2cur
 snark_verifier = { git = "https://github.com/privacy-scaling-explorations/snark-verifier.git", package = "snark-verifier" }
 rand = "0.8.5"
 itertools = "0.11.0"
+hex = "0.4.3"
