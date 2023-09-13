@@ -64,7 +64,7 @@ fn gen_proof<C: Circuit<Fr>>(
     params: &ParamsKZG<Bn256>,
     pk: &ProvingKey<G1Affine>,
     circuit: C,
-    instances: Vec<Vec<Fr>>,
+    instances: &Vec<Vec<Fr>>,
 ) -> Vec<u8> {
     MockProver::run(params.k(), &circuit, instances.clone())
         .unwrap()
@@ -106,12 +106,6 @@ fn gen_proof<C: Circuit<Fr>>(
     proof
 }
 
-fn evm_verify(deployment_code: Vec<u8>, instances: Vec<Vec<Fr>>, proof: Vec<u8>) {
-    let calldata = encode_calldata(&instances, &proof);
-    let gas_cost = deploy_and_call(deployment_code, calldata).unwrap();
-    dbg!(gas_cost);
-}
-
 fn main() {
     // prepare verifier
     let constant = Fr::from(7);
@@ -124,7 +118,7 @@ fn main() {
 
     let pk = gen_pk(&params, &empty_circuit);
     let deployment_code = gen_evm_verifier(&params, pk.get_vk(), vec![1]);
-    println!("0x{}", hex::encode(deployment_code.clone()));
+    println!("contract bytecode: 0x{}", hex::encode(&deployment_code));
 
     // prove & verify
     let a = Fr::from(2);
@@ -135,6 +129,11 @@ fn main() {
         a: Value::known(a),
         b: Value::known(b),
     };
-    let proof = gen_proof(&params, &pk, circuit.clone(), vec![vec![c]]);
-    evm_verify(deployment_code, vec![vec![c]], proof);
+    let instances = vec![vec![c]];
+    let proof = gen_proof(&params, &pk, circuit.clone(), &instances);
+    let calldata = encode_calldata(&instances, &proof);
+    println!("verify proof calldata: 0x{}", hex::encode(&calldata));
+
+    let gas_cost = deploy_and_call(deployment_code, calldata).unwrap();
+    println!("verified gas cost: {}", gas_cost);
 }

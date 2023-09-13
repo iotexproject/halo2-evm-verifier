@@ -15,3 +15,9 @@ Hello halo2
 ## Steps
 
 ### 1. Write circuits
+
+### 2. Generate Onchain verifier
+
+> Requirement: install `solc`
+
+### 3. WASM prover (WIP)
