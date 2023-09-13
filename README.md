@@ -30,13 +30,7 @@ Hello halo2
 pragma solidity ^0.8.19;
 
 contract Verifier {
-    address yulVerifier;
-
-    constructor(address _yulVerifier) {
-        yulVerifier = _yulVerifier;
-    }
-
-    function verify(bytes calldata input) external view returns (bool) {
+    function verify(address yulVerifier, bytes calldata input) external view returns (bool) {
         (bool success, ) = yulVerifier.staticcall(input);
         return success;
     }
@@ -50,3 +44,8 @@ contract Verifier {
 ```
 cargo run src/main.rs
 ```
+
+### IoTeX testnet deployment
+
+The universal solidity contract address: `0xF6577c31eaE769aE303e6D38070fE88A3e8830c9`
+The simple yul verifier contract address: `0x9c96BD9C822cFb56F5324d29e45d36edf36aD5C3`

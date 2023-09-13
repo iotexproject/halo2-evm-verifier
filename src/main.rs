@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{fs, rc::Rc};
 
 use halo2_curves::bn256::{Bn256, Fq, Fr, G1Affine};
 use halo2_hello::circuits::simple::SimpleCircuit;
@@ -16,6 +16,7 @@ use halo2_proofs::{
         VerificationStrategy,
     },
     transcript::{TranscriptReadBuffer, TranscriptWriterBuffer},
+    SerdeFormat,
 };
 use itertools::Itertools;
 use rand::rngs::OsRng;
@@ -118,11 +119,18 @@ fn main() {
 
     let pk = gen_pk(&params, &empty_circuit);
     let deployment_code = gen_evm_verifier(&params, pk.get_vk(), vec![1]);
-    println!("contract bytecode: 0x{}", hex::encode(&deployment_code));
+
+    // store raw pk
+    let pk_raw = pk.to_bytes(SerdeFormat::RawBytes);
 
     // prove & verify
+    let pk = ProvingKey::<G1Affine>::from_bytes::<SimpleCircuit<Fr>>(
+        &pk_raw.clone(),
+        SerdeFormat::RawBytes,
+    )
+    .unwrap();
     let a = Fr::from(2);
-    let b = Fr::from(3);
+    let b = Fr::from(6);
     let c = constant * a.square() * b.square();
     let circuit = SimpleCircuit {
         constant,
@@ -132,8 +140,22 @@ fn main() {
     let instances = vec![vec![c]];
     let proof = gen_proof(&params, &pk, circuit.clone(), &instances);
     let calldata = encode_calldata(&instances, &proof);
-    println!("verify proof calldata: 0x{}", hex::encode(&calldata));
 
-    let gas_cost = deploy_and_call(deployment_code, calldata).unwrap();
+    let gas_cost = deploy_and_call(deployment_code.clone(), calldata.clone()).unwrap();
     println!("verified gas cost: {}", gas_cost);
+
+    let output = format!(
+        r#"{{
+    "contract": "0x{}",
+    "pk": "0x{}",
+    "proof": "0x{}",
+    "calldata": "0x{}"
+}}"#,
+        hex::encode(&deployment_code),
+        hex::encode(&pk_raw),
+        hex::encode(&proof),
+        hex::encode(&calldata),
+    );
+
+    let _ = fs::write("output.json", output);
 }
