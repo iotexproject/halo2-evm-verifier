@@ -48,4 +48,4 @@ cargo run src/main.rs
 ### IoTeX testnet deployment
 
 The universal solidity contract address: `0xF6577c31eaE769aE303e6D38070fE88A3e8830c9`
-The simple yul verifier contract address: `0x9c96BD9C822cFb56F5324d29e45d36edf36aD5C3`
+The simple yul verifier contract address: `0x87F2C4BD92cD417f79255d793C3ddc24E6F01176`
