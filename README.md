@@ -22,7 +22,7 @@ Hello halo2
 
 ### 3. WASM prover (WIP)
 
-### 4. Aggregator proof
+### 4. Aggregator proof (TODO)
 
 ## Solidity verifier
 
@@ -41,4 +41,12 @@ contract Verifier {
         return success;
     }
 }
+```
+
+## Development
+
+### Generate contract and calldata (TODO: refactor to cli)
+
+```
+cargo run src/main.rs
 ```
