@@ -45,9 +45,9 @@ pub enum Subcommands {
         params: String,
         #[clap(long, short, value_name = "constant", default_value = "7")]
         constant: u64,
-        #[clap(long, default_value = "3")]
+        #[clap(short, default_value = "3")]
         a: u64,
-        #[clap(long, default_value = "5")]
+        #[clap(short, default_value = "5")]
         b: u64,
     },
 }

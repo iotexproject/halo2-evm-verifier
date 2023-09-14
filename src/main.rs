@@ -47,8 +47,14 @@ fn main() {
             let sol_code = gen_sol_verifier(&params, empty_circuit, vec![1])
                 .expect("generate solidity file error");
             if bytecode {
-                fs::write(file, evm::compile_solidity(sol_code.as_str()))
-                    .expect("write verifier bytecode error");
+                fs::write(
+                    file,
+                    format!(
+                        "0x{}",
+                        hex::encode(evm::compile_solidity(sol_code.as_str()))
+                    ),
+                )
+                .expect("write verifier bytecode error");
             } else {
                 fs::write(file, sol_code).expect("write verifier solidity error");
             }

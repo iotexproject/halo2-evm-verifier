@@ -37,16 +37,30 @@ contract Verifier {
 }
 ```
 
-## Development
+## Usage
 
-### Generate contract and calldata (TODO: refactor to cli)
+### Build
 
 ```
-cargo run src/main.rs
+cargo build --release
+```
+
+### Run
+
+```
+// help message
+target/release/halo2-hello -h
+
+// generate params binary
+target/release/halo2-hello params
+
+// generate solidity file or bytecode
+target/release/halo2-hello solidity
+
+// generate proof and calldata
+target/release/halo2-hello proof
 ```
 
 ### IoTeX testnet deployment
 
 The universal solidity contract address: `0xF6577c31eaE769aE303e6D38070fE88A3e8830c9`
-
-The simple yul verifier contract address: `0x87F2C4BD92cD417f79255d793C3ddc24E6F01176`
