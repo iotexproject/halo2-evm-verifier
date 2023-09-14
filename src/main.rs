@@ -1,20 +1,20 @@
-use std::{
-    fs::{self, File},
-    io::BufReader,
-};
-
 use clap::Parser;
 use halo2_curves::bn256::{Bn256, Fr};
-use halo2_hello::{
-    circuits::simple::SimpleCircuit,
-    generator::{gen_pk, gen_proof, gen_sol_verifier, gen_srs},
-    opts::{Opts, Subcommands},
-};
 use halo2_proofs::{
     circuit::Value,
     poly::{commitment::Params, kzg::commitment::ParamsKZG},
 };
 use snark_verifier::loader::evm::{self, encode_calldata};
+use std::{
+    fs::{self, File},
+    io::BufReader,
+};
+
+use halo2_evm_verifier::{
+    circuits::simple::SimpleCircuit,
+    generator::{gen_pk, gen_proof, gen_sol_verifier, gen_srs},
+    opts::{Opts, Subcommands},
+};
 
 fn main() {
     let opts = Opts::parse();

@@ -1,5 +1,5 @@
-Hello halo2
-===========
+Halo2 EVM Verifier
+==================
 
 ## Halo2
 
@@ -49,16 +49,16 @@ cargo build --release
 
 ```
 // help message
-target/release/halo2-hello -h
+target/release/halo2-evm-verifier -h
 
 // generate params binary
-target/release/halo2-hello params
+target/release/halo2-evm-verifier params
 
 // generate solidity file or bytecode
-target/release/halo2-hello solidity
+target/release/halo2-evm-verifier solidity
 
 // generate proof and calldata
-target/release/halo2-hello proof
+target/release/halo2-evm-verifier proof
 ```
 
 ### IoTeX testnet deployment
