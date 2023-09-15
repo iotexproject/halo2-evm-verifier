@@ -4,7 +4,7 @@ use halo2_proofs::{
     circuit::Value,
     poly::{commitment::Params, kzg::commitment::ParamsKZG},
 };
-use snark_verifier::loader::evm::{self, encode_calldata};
+use snark_verifier::loader::evm::{self, deploy_and_call, encode_calldata};
 use std::{
     fs::{self, File},
     io::BufReader,
@@ -62,6 +62,7 @@ fn main() {
 
         Subcommands::Proof {
             file,
+            verify,
             params,
             constant,
             a,
@@ -91,6 +92,14 @@ fn main() {
             let instances = vec![vec![c]];
             let proof = gen_proof(&params, &pk, circuit.clone(), &instances);
             let calldata = encode_calldata(&instances, &proof);
+            if verify {
+                let deployment_code = gen_sol_verifier(&params, empty_circuit, vec![1])
+                    .expect("generate contract error");
+                let deployment_code = evm::compile_solidity(&deployment_code);
+                let gas_cost = deploy_and_call(deployment_code.clone(), calldata.clone())
+                    .expect("verify proof error");
+                println!("verified gas cost: {}", gas_cost);
+            }
 
             let output = format!(
                 r#"{{

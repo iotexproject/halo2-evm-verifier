@@ -41,6 +41,8 @@ pub enum Subcommands {
     Proof {
         #[clap(long, short, value_name = "file", default_value = "proof.json")]
         file: String,
+        #[clap(long, short)]
+        verify: bool,
         #[clap(long, short, value_name = "params", default_value = "params.bin")]
         params: String,
         #[clap(long, short, value_name = "constant", default_value = "7")]
