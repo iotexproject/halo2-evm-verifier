@@ -45,6 +45,18 @@ pub enum Subcommands {
         bytecode: bool,
     },
 
+    #[clap(name = "graph")]
+    #[clap(visible_aliases = &["gp"])]
+    #[clap(about = "Generate circuit layout graph.")]
+    Graph {
+        #[clap(long, short, value_name = "file", default_value = "output/graph.png")]
+        file: String,
+        #[clap(long, short, value_name = "title", default_value = "Simple circuit")]
+        title: String,
+        #[clap(short, value_name = "k", default_value = "5")]
+        k: u32,
+    },
+
     #[clap(name = "proof")]
     #[clap(visible_aliases = &["pro"])]
     #[clap(about = "Generate proof for circuit.")]

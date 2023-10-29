@@ -2,6 +2,7 @@ use clap::Parser;
 use halo2_curves::bn256::{Bn256, Fr};
 use halo2_proofs::{
     circuit::Value,
+    dev::CircuitLayout,
     poly::{commitment::Params, kzg::commitment::ParamsKZG},
 };
 use snark_verifier::loader::evm::{self, deploy_and_call, encode_calldata};
@@ -15,6 +16,7 @@ use halo2_evm_verifier::{
     generator::{gen_pk, gen_proof, gen_sol_verifier, gen_srs},
     opts::{Opts, Subcommands},
 };
+use plotters::prelude::{BitMapBackend, IntoDrawingArea, WHITE};
 
 fn main() {
     let opts = Opts::parse();
@@ -58,6 +60,17 @@ fn main() {
             } else {
                 fs::write(file, sol_code).expect("write verifier solidity error");
             }
+        }
+
+        Subcommands::Graph { file, title, k } => {
+            let circuit = SimpleCircuit::<Fr>::default();
+            let root = BitMapBackend::new(&file, (1024, 768)).into_drawing_area();
+            root.fill(&WHITE).unwrap();
+            let root = root.titled(&title, ("sans-serif", 60)).unwrap();
+            CircuitLayout::default()
+                .show_labels(true)
+                .render(k, &circuit, &root)
+                .unwrap();
         }
 
         Subcommands::Proof {

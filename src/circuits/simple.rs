@@ -252,6 +252,18 @@ impl<F: Field> Circuit<F> for SimpleCircuit<F> {
         FieldChip::configure(meta, advice, instance, constant)
     }
 
+    // circuit layout
+    // | ins  | advice_0 | advice_1 | seletor |
+    // |------|----------|----------|---------|
+    // |  out |    a     |          |         |
+    // |      |    b     |          |         |
+    // |      | constant |          |         |
+    // |      |    a     |     b    |    1    |
+    // |      |   ab     |          |    0    |
+    // |      |   ab     |    ab    |    1    |
+    // |      |   absq   |          |    0    |
+    // |      | constant |   absq   |    1    |
+    // |      |   out    |          |    0    |
     fn synthesize(
         &self,
         config: Self::Config,
