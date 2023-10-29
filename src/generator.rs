@@ -46,7 +46,7 @@ pub fn gen_sol_verifier<C: Circuit<Fr>>(
     empty_circuit: C,
     num_instance: Vec<usize>,
 ) -> Result<String, Error> {
-    let pk = gen_pk(&params, &empty_circuit);
+    let pk = gen_pk(params, &empty_circuit);
 
     let protocol = compile(
         params,
@@ -76,9 +76,9 @@ pub fn gen_proof<C: Circuit<Fr>>(
     params: &ParamsKZG<Bn256>,
     pk: &ProvingKey<G1Affine>,
     circuit: C,
-    instances: &Vec<Vec<Fr>>,
+    instances: &[Vec<Fr>],
 ) -> Vec<u8> {
-    MockProver::run(params.k(), &circuit, instances.clone())
+    MockProver::run(params.k(), &circuit, instances.to_vec())
         .unwrap()
         .assert_satisfied();
 

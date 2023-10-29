@@ -22,7 +22,7 @@ fn main() {
     match opts.sub {
         Subcommands::Params { file } => {
             let mut params_file = File::create(file.clone())
-                .expect(format!("create params file [{}] error", file).as_str());
+                .unwrap_or_else(|_| panic!("create params file [{}] error", file));
             let params = gen_srs(4);
             params.write(&mut params_file).expect("write file error");
         }

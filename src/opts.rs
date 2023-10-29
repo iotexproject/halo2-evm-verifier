@@ -17,7 +17,7 @@ pub enum Subcommands {
     #[clap(name = "params")]
     #[clap(about = "Generate KZG params (don't used in production).")]
     Params {
-        #[clap(long, short, value_name = "file", default_value = "params.bin")]
+        #[clap(long, short, value_name = "file", default_value = "output/params.bin")]
         file: String,
     },
 
@@ -25,9 +25,19 @@ pub enum Subcommands {
     #[clap(visible_aliases = &["sol"])]
     #[clap(about = "Generate verifier solidity contract.")]
     Solidity {
-        #[clap(long, short, value_name = "file", default_value = "Verifier.sol")]
+        #[clap(
+            long,
+            short,
+            value_name = "file",
+            default_value = "output/Verifier.sol"
+        )]
         file: String,
-        #[clap(long, short, value_name = "params", default_value = "params.bin")]
+        #[clap(
+            long,
+            short,
+            value_name = "params",
+            default_value = "output/params.bin"
+        )]
         params: String,
         #[clap(long, short, value_name = "constant", default_value = "7")]
         constant: u64,
@@ -39,11 +49,16 @@ pub enum Subcommands {
     #[clap(visible_aliases = &["pro"])]
     #[clap(about = "Generate proof for circuit.")]
     Proof {
-        #[clap(long, short, value_name = "file", default_value = "proof.json")]
+        #[clap(long, short, value_name = "file", default_value = "output/proof.json")]
         file: String,
         #[clap(long, short)]
         verify: bool,
-        #[clap(long, short, value_name = "params", default_value = "params.bin")]
+        #[clap(
+            long,
+            short,
+            value_name = "params",
+            default_value = "output/params.bin"
+        )]
         params: String,
         #[clap(long, short, value_name = "constant", default_value = "7")]
         constant: u64,
