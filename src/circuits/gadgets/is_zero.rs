@@ -120,6 +120,19 @@ mod test {
         }};
     }
 
+    macro_rules! try_test_circuit_error {
+        ($values:expr, $checks:expr) => {{
+            let k = usize::BITS - $values.len().leading_zeros() + 2;
+            let circuit = TestCircuit::<Fr> {
+                values: Some($values),
+                checks: Some($checks),
+                _marker: PhantomData,
+            };
+            let prover = MockProver::<Fr>::run(k, &circuit, vec![]).unwrap();
+            assert!(prover.verify_par().is_err());
+        }};
+    }
+
     #[derive(Clone, Debug)]
     struct TestCircuitConfig<F> {
         q_enable: Selector,
@@ -235,5 +248,7 @@ mod test {
     fn test_circuit() {
         try_test_circuit!(vec![1, 2, 3, 4, 5], vec![false, false, false, false]);
         try_test_circuit!(vec![1, 2, 3, 5, 5], vec![false, false, false, true]);
+        try_test_circuit_error!(vec![1, 2], vec![true]);
+        try_test_circuit_error!(vec![1, 1], vec![false]);
     }
 }
