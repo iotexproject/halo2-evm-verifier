@@ -45,7 +45,7 @@ impl<F: Field> FibonacciChip<F> {
             // |-------|------- |------- |------- |
             // |   a   | f(0)=a | f(1)=b |    1   |
             // |   b   | f(2)=b | f(3)   |    1   |
-            // |  out  | f(4)   | f(5)   |    1   |
+            // |  out  | f(4)   | f(5)   |    0   |
             let s = meta.query_selector(selector);
             let lc = meta.query_advice(advice[0], Rotation::cur());
             let rc = meta.query_advice(advice[1], Rotation::cur());
