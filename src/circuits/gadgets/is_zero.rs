@@ -107,6 +107,19 @@ mod test {
 
     use super::{Field, IsZeroChip, IsZeroConfig, IsZeroInstructin};
 
+    macro_rules! try_test_circuit {
+        ($values:expr, $checks:expr) => {{
+            let k = usize::BITS - $values.len().leading_zeros() + 2;
+            let circuit = TestCircuit::<Fr> {
+                values: Some($values),
+                checks: Some($checks),
+                _marker: PhantomData,
+            };
+            let prover = MockProver::<Fr>::run(k, &circuit, vec![]).unwrap();
+            prover.assert_satisfied()
+        }};
+    }
+
     #[derive(Clone, Debug)]
     struct TestCircuitConfig<F> {
         q_enable: Selector,
@@ -220,16 +233,7 @@ mod test {
 
     #[test]
     fn test_circuit() {
-        let values = vec![1, 2, 3, 4, 5];
-        let checks = vec![false, false, false, false];
-        let k = usize::BITS - values.len().leading_zeros() + 2;
-
-        let circuit = TestCircuit::<Fr> {
-            values: Some(values),
-            checks: Some(checks),
-            _marker: PhantomData,
-        };
-        let prover = MockProver::<Fr>::run(k, &circuit, vec![]).unwrap();
-        prover.assert_satisfied()
+        try_test_circuit!(vec![1, 2, 3, 4, 5], vec![false, false, false, false]);
+        try_test_circuit!(vec![1, 2, 3, 5, 5], vec![false, false, false, true]);
     }
 }
