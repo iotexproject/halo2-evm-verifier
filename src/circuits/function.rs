@@ -97,18 +97,18 @@ impl<F: Field> Circuit<F> for FunctionCircuit<F> {
                 region.assign_advice(|| "load b", config.b, 0, || Value::known(F::from(self.b)))?;
                 region.assign_advice(|| "load c", config.c, 0, || Value::known(F::from(self.c)))?;
                 let output = if self.a == self.b {
-                    self.c
+                    F::from(self.c)
                 } else {
-                    self.a - self.b
+                    F::from(self.a) - F::from(self.b)
                 };
-                let output = region.assign_advice(
-                    || "output",
-                    config.a,
-                    1,
-                    || Value::known(F::from(output)),
-                )?;
+                let output =
+                    region.assign_advice(|| "output", config.a, 1, || Value::known(output))?;
 
-                is_zero_chip.assign(&mut region, 0, Value::known(F::from(self.a - self.b)))?;
+                is_zero_chip.assign(
+                    &mut region,
+                    0,
+                    Value::known(F::from(self.a) - F::from(self.b)),
+                )?;
 
                 Ok(output)
             },
@@ -129,7 +129,7 @@ mod tests {
     #[test]
     fn verify() {
         let a = 2;
-        let b = 1;
+        let b = 10;
         let c = 3;
         let circuit = FunctionCircuit::<Fr> {
             a,
@@ -138,8 +138,12 @@ mod tests {
             _marker: PhantomData,
         };
 
-        let out = if a == b { c } else { a - b };
-        let out = vec![Fr::from(out)];
+        let out = if a == b {
+            Fr::from(c)
+        } else {
+            Fr::from(a) - Fr::from(b)
+        };
+        let out = vec![out];
 
         let prover = MockProver::run(4, &circuit, vec![out]).unwrap();
         prover.assert_satisfied();
