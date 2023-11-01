@@ -42,25 +42,9 @@ contract Verifier {
 ### Build
 
 ```
-cargo build --release
+wasm-pack build --release --out-name prover.wasm --out-dir pkg
 ```
 
 ### Run
 
-```
-// help message
-target/release/halo2-evm-verifier -h
-
-// generate params binary
-target/release/halo2-evm-verifier params
-
-// generate solidity file or bytecode
-target/release/halo2-evm-verifier solidity
-
-// generate proof and calldata
-target/release/halo2-evm-verifier proof
-```
-
-### IoTeX testnet deployment
-
-The universal solidity contract address: `0xF6577c31eaE769aE303e6D38070fE88A3e8830c9`
+TODO

@@ -10,5 +10,9 @@ snark_verifier = { git = "https://github.com/privacy-scaling-explorations/snark-
 rand = "0.8.5"
 itertools = "0.11.0"
 hex = "0.4.3"
-clap = { version = "4.4.3", features = ["derive", "env", "unicode", "wrap_help"] }
 plotters = { version = "0.3.0", default-features = true }
+wasm-bindgen = "0.2.87"
+getrandom = { version = "0.2", features = ["js"] }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
