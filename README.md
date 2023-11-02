@@ -42,7 +42,8 @@ contract Verifier {
 ### Build
 
 ```
-wasm-pack build --release --out-name prover.wasm --out-dir pkg
+// bundler, nodejs, web, no-modules, default is bundler
+wasm-pack build --target nodejs --out-name prover.wasm --out-dir pkg
 ```
 
 ### Run

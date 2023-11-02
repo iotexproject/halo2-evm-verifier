@@ -12,10 +12,10 @@ use halo2_proofs::{
 };
 use snark_verifier::loader::evm::encode_calldata;
 
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
-pub fn prove() -> JsValue {
+pub fn prove() -> std::string::String {
     let constant = Fr::from(7);
     let a = Fr::from(5);
     let b = Fr::from(6);
@@ -43,12 +43,12 @@ pub fn prove() -> JsValue {
     let proof = gen_proof(&params, &pk, circuit.clone(), &instances);
     let calldata = encode_calldata(&instances, &proof);
 
-    JsValue::from_str(&format!(
+    format!(
         r#"{{
 "proof": "0x{}",
 "calldata": "0x{}"
 }}"#,
         hex::encode(&proof),
         hex::encode(calldata),
-    ))
+    )
 }
