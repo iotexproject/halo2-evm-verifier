@@ -1,11 +1,21 @@
 use clap::Parser;
-use halo2_curves::bn256::{Bn256, Fr};
+use halo2_curves::bn256::{Bn256, Fr, G1Affine};
 use halo2_proofs::{
     circuit::Value,
     dev::CircuitLayout,
-    poly::{commitment::Params, kzg::commitment::ParamsKZG},
+    plonk::verify_proof,
+    poly::{
+        commitment::{Params, ParamsProver},
+        kzg::{commitment::ParamsKZG, multiopen::VerifierGWC, strategy::AccumulatorStrategy},
+        VerificationStrategy,
+    },
+    transcript::TranscriptReadBuffer,
 };
-use snark_verifier::loader::evm::{self, deploy_and_call, encode_calldata};
+use itertools::Itertools;
+use snark_verifier::{
+    loader::evm::{self, deploy_and_call, encode_calldata},
+    system::halo2::transcript::evm::EvmTranscript,
+};
 use std::{
     fs::{self, File},
     io::BufReader,
@@ -104,6 +114,26 @@ fn main() {
             };
             let instances = vec![vec![c]];
             let proof = gen_proof(&params, &pk, circuit.clone(), &instances);
+
+            let accept = {
+                let instances = instances
+                    .iter()
+                    .map(|instances| instances.as_slice())
+                    .collect_vec();
+                let mut transcript = TranscriptReadBuffer::<_, G1Affine, _>::init(proof.as_slice());
+                VerificationStrategy::<_, VerifierGWC<_>>::finalize(
+                    verify_proof::<_, VerifierGWC<_>, _, EvmTranscript<_, _, _, _>, _>(
+                        params.verifier_params(),
+                        pk.get_vk(),
+                        AccumulatorStrategy::new(params.verifier_params()),
+                        &[instances.as_slice()],
+                        &mut transcript,
+                    )
+                    .unwrap(),
+                )
+            };
+            assert!(accept);
+
             let calldata = encode_calldata(&instances, &proof);
             if verify {
                 let deployment_code = gen_sol_verifier(&params, empty_circuit, vec![1])

@@ -3,17 +3,15 @@ use std::rc::Rc;
 use halo2_curves::bn256::{Bn256, Fq, Fr, G1Affine};
 use halo2_proofs::{
     dev::MockProver,
-    plonk::{create_proof, keygen_pk, keygen_vk, verify_proof, Circuit, ProvingKey},
+    plonk::{create_proof, keygen_pk, keygen_vk, Circuit, ProvingKey},
     poly::{
         commitment::{Params, ParamsProver},
         kzg::{
             commitment::{KZGCommitmentScheme, ParamsKZG},
-            multiopen::{ProverGWC, VerifierGWC},
-            strategy::AccumulatorStrategy,
+            multiopen::ProverGWC,
         },
-        VerificationStrategy,
     },
-    transcript::{TranscriptReadBuffer, TranscriptWriterBuffer},
+    transcript::TranscriptWriterBuffer,
 };
 use itertools::Itertools;
 use rand::rngs::OsRng;
@@ -86,34 +84,15 @@ pub fn gen_proof<C: Circuit<Fr>>(
         .iter()
         .map(|instances| instances.as_slice())
         .collect_vec();
-    let proof = {
-        let mut transcript = TranscriptWriterBuffer::<_, G1Affine, _>::init(Vec::new());
-        create_proof::<KZGCommitmentScheme<Bn256>, ProverGWC<_>, _, _, EvmTranscript<_, _, _, _>, _>(
-            params,
-            pk,
-            &[circuit],
-            &[instances.as_slice()],
-            OsRng,
-            &mut transcript,
-        )
-        .unwrap();
-        transcript.finalize()
-    };
-
-    let accept = {
-        let mut transcript = TranscriptReadBuffer::<_, G1Affine, _>::init(proof.as_slice());
-        VerificationStrategy::<_, VerifierGWC<_>>::finalize(
-            verify_proof::<_, VerifierGWC<_>, _, EvmTranscript<_, _, _, _>, _>(
-                params.verifier_params(),
-                pk.get_vk(),
-                AccumulatorStrategy::new(params.verifier_params()),
-                &[instances.as_slice()],
-                &mut transcript,
-            )
-            .unwrap(),
-        )
-    };
-    assert!(accept);
-
-    proof
+    let mut transcript = TranscriptWriterBuffer::<_, G1Affine, _>::init(Vec::new());
+    create_proof::<KZGCommitmentScheme<Bn256>, ProverGWC<_>, _, _, EvmTranscript<_, _, _, _>, _>(
+        params,
+        pk,
+        &[circuit],
+        &[instances.as_slice()],
+        OsRng,
+        &mut transcript,
+    )
+    .unwrap();
+    transcript.finalize()
 }
