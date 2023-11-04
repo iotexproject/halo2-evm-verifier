@@ -2,6 +2,10 @@
 name = "halo2-evm-verifier"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Halo2 evm verifier"
+homepage = "https://github.com/iotexproject/halo2-evm-verifier"
+repository = "https://github.com/iotexproject/halo2-evm-verifier"
 
 [dependencies]
 halo2_proofs = { git = "https://github.com/privacy-scaling-explorations/halo2.git", tag = "v2023_04_20", features = ["dev-graph"]}
