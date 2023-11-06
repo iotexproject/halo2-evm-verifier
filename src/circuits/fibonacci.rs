@@ -62,10 +62,10 @@ impl<F: Field> FibonacciChip<F> {
     }
 }
 
-#[derive(Debug, Default)]
-struct FibonacciCircuit<F: Field> {
-    n: usize,
-    _marker: PhantomData<F>,
+#[derive(Debug, Default, Clone)]
+pub struct FibonacciCircuit<F: Field> {
+    pub n: usize,
+    pub _marker: PhantomData<F>,
 }
 
 impl<F: Field> Circuit<F> for FibonacciCircuit<F> {
@@ -113,8 +113,6 @@ impl<F: Field> Circuit<F> for FibonacciCircuit<F> {
                     let cur_right = region.assign_advice(|| "f right", rhs, i, || value)?;
                     prev_left = cur_left;
                     prev_right = cur_right;
-
-                    println!("{}", 1);
                 }
 
                 if self.n % 2 == 0 {
@@ -130,21 +128,21 @@ impl<F: Field> Circuit<F> for FibonacciCircuit<F> {
     }
 }
 
+pub fn fib(n: u64) -> u64 {
+    match n {
+        0 => 1,
+        1 => 1,
+        _ => fib(n - 1) + fib(n - 2),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::marker::PhantomData;
 
-    use super::FibonacciCircuit;
+    use super::{fib, FibonacciCircuit};
     use halo2_curves::bn256::Fr;
     use halo2_proofs::dev::MockProver;
-
-    fn fib(n: u64) -> u64 {
-        match n {
-            0 => 1,
-            1 => 1,
-            _ => fib(n - 1) + fib(n - 2),
-        }
-    }
 
     #[test]
     fn verify() {
