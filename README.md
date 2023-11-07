@@ -39,11 +39,20 @@ contract Verifier {
 
 ## Usage
 
+### Builder
+
+```
+docker build -t wasm-builder .
+```
+
 ### Build
 
 ```
 // bundler, nodejs, web, no-modules, default is bundler
 wasm-pack build --target nodejs --out-name prover.wasm --out-dir pkg
+
+// docker
+docker run --rm -v `pwd`:/src -w /src wasm-builder cargo build --target wasm32-wasi
 ```
 
 ### Run
