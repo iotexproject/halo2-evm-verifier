@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 halo2_proofs = { git = "https://github.com/privacy-scaling-explorations/halo2.git", tag = "v2023_04_20"}
 halo2_curves = { git = "https://github.com/privacy-scaling-explorations/halo2curves", tag = "0.3.2", package = "halo2curves" }
-snark_verifier = { git = "https://github.com/ququzone/snark-verifier", rev="68ad2ce", package = "snark-verifier" }
+snark_verifier = { git = "https://github.com/ququzone/snark-verifier", rev="baeae03", package = "snark-verifier" }
 rand = "0.8.5"
 itertools = "0.11.0"
 hex = "0.4.3"
