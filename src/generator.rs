@@ -2,10 +2,9 @@ use std::rc::Rc;
 
 use halo2_curves::bn256::{Bn256, Fq, Fr, G1Affine};
 use halo2_proofs::{
-    dev::MockProver,
     plonk::{create_proof, keygen_pk, keygen_vk, Circuit, ProvingKey},
     poly::{
-        commitment::{Params, ParamsProver},
+        commitment::ParamsProver,
         kzg::{
             commitment::{KZGCommitmentScheme, ParamsKZG},
             multiopen::ProverGWC,
@@ -76,10 +75,6 @@ pub fn gen_proof<C: Circuit<Fr>>(
     circuit: C,
     instances: &[Vec<Fr>],
 ) -> Vec<u8> {
-    MockProver::run(params.k(), &circuit, instances.to_vec())
-        .unwrap()
-        .assert_satisfied();
-
     let instances = instances
         .iter()
         .map(|instances| instances.as_slice())
