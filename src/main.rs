@@ -58,6 +58,7 @@ fn main() {
 
             let sol_code = gen_sol_verifier(&params, empty_circuit, vec![1])
                 .expect("generate solidity file error");
+            println!("Generated verifier contract size: {}", evm::compile_solidity(sol_code.as_str()).len());
             if bytecode {
                 fs::write(
                     file,
