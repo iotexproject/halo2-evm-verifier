@@ -3,7 +3,7 @@ use halo2_curves::bn256::{Bn256, Fr, G1Affine};
 use halo2_proofs::{
     circuit::Value,
     dev::CircuitLayout,
-    plonk::verify_proof,
+    plonk,
     poly::{
         commitment::{Params, ParamsProver},
         kzg::{commitment::ParamsKZG, multiopen::VerifierGWC, strategy::AccumulatorStrategy},
@@ -11,6 +11,7 @@ use halo2_proofs::{
     },
     transcript::TranscriptReadBuffer,
 };
+use hex::FromHex;
 use itertools::Itertools;
 use snark_verifier::{
     loader::evm::{self, deploy_and_call, encode_calldata},
@@ -23,7 +24,7 @@ use std::{
 
 use halo2_evm_verifier::{
     circuits::simple::SimpleCircuit,
-    generator::{gen_pk, gen_proof, gen_sol_verifier, gen_srs},
+    generator::{gen_pk, gen_proof, gen_sol_verifier, gen_srs, verify_proof},
     opts::{Opts, Subcommands},
 };
 use plotters::prelude::{BitMapBackend, IntoDrawingArea, WHITE};
@@ -58,7 +59,10 @@ fn main() {
 
             let sol_code = gen_sol_verifier(&params, empty_circuit, vec![1])
                 .expect("generate solidity file error");
-            println!("Generated verifier contract size: {}", evm::compile_solidity(sol_code.as_str()).len());
+            println!(
+                "Generated verifier contract size: {}",
+                evm::compile_solidity(sol_code.as_str()).len()
+            );
             if bytecode {
                 fs::write(
                     file,
@@ -123,7 +127,7 @@ fn main() {
                     .collect_vec();
                 let mut transcript = TranscriptReadBuffer::<_, G1Affine, _>::init(proof.as_slice());
                 VerificationStrategy::<_, VerifierGWC<_>>::finalize(
-                    verify_proof::<_, VerifierGWC<_>, _, EvmTranscript<_, _, _, _>, _>(
+                    plonk::verify_proof::<_, VerifierGWC<_>, _, EvmTranscript<_, _, _, _>, _>(
                         params.verifier_params(),
                         pk.get_vk(),
                         AccumulatorStrategy::new(params.verifier_params()),
@@ -155,6 +159,30 @@ fn main() {
             );
 
             fs::write(file, output).expect("write proof file error");
+        }
+
+        Subcommands::Verify {
+            params,
+            constant,
+            c,
+            proof,
+        } => {
+            let constant = Fr::from(constant);
+            let params_raw = fs::read(params).expect("read params file error");
+            let params = ParamsKZG::<Bn256>::read(&mut BufReader::new(params_raw.as_slice()))
+                .expect("restore params error");
+
+            let empty_circuit = SimpleCircuit {
+                constant,
+                a: Value::unknown(),
+                b: Value::unknown(),
+            };
+            let pk = gen_pk(&params, &empty_circuit);
+            let instances = vec![vec![Fr::from(c)]];
+            let proof = Vec::from_hex(proof).unwrap();
+            let result = verify_proof(&params, &pk, proof, &instances);
+
+            println!("Verify proof result: {}", result);
         }
     }
 }

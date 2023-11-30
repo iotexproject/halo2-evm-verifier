@@ -2,15 +2,17 @@ use std::rc::Rc;
 
 use halo2_curves::bn256::{Bn256, Fq, Fr, G1Affine};
 use halo2_proofs::{
-    plonk::{create_proof, keygen_pk, keygen_vk, Circuit, ProvingKey},
+    plonk::{self, create_proof, keygen_pk, keygen_vk, Circuit, ProvingKey},
     poly::{
         commitment::ParamsProver,
         kzg::{
             commitment::{KZGCommitmentScheme, ParamsKZG},
-            multiopen::ProverGWC,
+            multiopen::{ProverGWC, VerifierGWC},
+            strategy::AccumulatorStrategy,
         },
+        VerificationStrategy,
     },
-    transcript::TranscriptWriterBuffer,
+    transcript::{TranscriptReadBuffer, TranscriptWriterBuffer},
 };
 use itertools::Itertools;
 use rand::rngs::OsRng;
@@ -90,4 +92,27 @@ pub fn gen_proof<C: Circuit<Fr>>(
     )
     .unwrap();
     transcript.finalize()
+}
+
+pub fn verify_proof(
+    params: &ParamsKZG<Bn256>,
+    pk: &ProvingKey<G1Affine>,
+    proof: Vec<u8>,
+    instances: &[Vec<Fr>],
+) -> bool {
+    let instances = instances
+        .iter()
+        .map(|instances| instances.as_slice())
+        .collect_vec();
+    let mut transcript = TranscriptReadBuffer::<_, G1Affine, _>::init(proof.as_slice());
+    VerificationStrategy::<_, VerifierGWC<_>>::finalize(
+        plonk::verify_proof::<_, VerifierGWC<_>, _, EvmTranscript<_, _, _, _>, _>(
+            params.verifier_params(),
+            pk.get_vk(),
+            AccumulatorStrategy::new(params.verifier_params()),
+            &[instances.as_slice()],
+            &mut transcript,
+        )
+        .unwrap(),
+    )
 }

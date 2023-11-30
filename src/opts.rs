@@ -79,4 +79,23 @@ pub enum Subcommands {
         #[clap(short, default_value = "5")]
         b: u64,
     },
+
+    #[clap(name = "verify")]
+    #[clap(visible_aliases = &["ver"])]
+    #[clap(about = "Verify proof for circuit.")]
+    Verify {
+        #[clap(
+            long,
+            short,
+            value_name = "params",
+            default_value = "output/params.bin"
+        )]
+        params: String,
+        #[clap(long, short, value_name = "constant", default_value = "7")]
+        constant: u64,
+        #[clap(short, default_value = "1575")]
+        c: u64,
+        #[clap(long, short, value_name = "proof")]
+        proof: String,
+    },
 }
